@@ -12,7 +12,7 @@ export default function Login({ setToken }) {
     e.preventDefault();
     try {
       // ⚠️ CHANGE localhost to your Render URL when online
-      const res = await axios.post('http://localhost:3000/login', { email, password });
+      const res = await axios.post('https://budgex-r4do.onrender.com', { email, password });
       setToken(res.data.user); // Save login info
       localStorage.setItem('user', JSON.stringify(res.data.user)); // Keep logged in
       navigate('/'); // Go to Dashboard

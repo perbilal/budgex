@@ -7,7 +7,7 @@ export default function Inventory() {
   const [form, setForm] = useState({ name: '', category: '', price: '', cost: '', stock: '' });
 
   // ⚠️ CHANGE THIS URL TO YOUR RENDER URL WHEN DEPLOYING
-  const API_URL = 'http://localhost:3000';
+  const API_URL = 'https://budgex-r4do.onrender.com';
 
   useEffect(() => {
     fetchProducts();

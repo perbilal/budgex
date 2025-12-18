@@ -25,8 +25,11 @@ export default function Dashboard() {
   const [selectedProductId, setSelectedProductId] = useState('');
   const [quantity, setQuantity] = useState(1);
 
+  // --- NEW: Toggle for "Inventory vs Custom" Logic ---
+  const [isInventorySale, setIsInventorySale] = useState(true);
+
   // ⚠️ CHANGE THIS URL TO YOUR RENDER URL WHEN DEPLOYING
-  const API_URL = 'http://localhost:3000'; 
+  const API_URL = 'https://budgex-r4do.onrender.com'; 
 
   // --- FETCH DATA ---
   useEffect(() => {
@@ -84,14 +87,19 @@ export default function Dashboard() {
     e.preventDefault();
     if (!amount) return;
 
+    // --- UPDATED LOGIC ---
+    // Only send productId if it is an Income AND "Inventory Sale" is checked
+    const finalProductId = (type === 'income' && isInventorySale) ? selectedProductId : null;
+    const finalQuantity = (type === 'income' && isInventorySale) ? Number(quantity) : null;
+
     try {
       await axios.post(`${API_URL}/transactions`, {
         description,
         amount: Number(amount),
         type,
-        // Send these to server to update stock (Only if it's an Income)
-        productId: type === 'income' ? selectedProductId : null,
-        quantity: type === 'income' ? Number(quantity) : null
+        // Send these to server to update stock (Only if we selected a product)
+        productId: finalProductId,
+        quantity: finalQuantity
       });
 
       // Reset Form
@@ -215,12 +223,29 @@ export default function Dashboard() {
                 </button>
               </div>
 
+              {/* --- NEW: CHECKBOX (Only show if Income) --- */}
+              {type === 'income' && (
+                <div className="flex items-center gap-2 p-2 bg-indigo-50 rounded-lg border border-indigo-100">
+                  <input 
+                    type="checkbox" 
+                    id="stockToggle"
+                    checked={isInventorySale} 
+                    onChange={(e) => setIsInventorySale(e.target.checked)}
+                    className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500 cursor-pointer"
+                  />
+                  <label htmlFor="stockToggle" className="text-sm text-gray-700 font-medium cursor-pointer select-none">
+                    Sell from Inventory?
+                  </label>
+                </div>
+              )}
+
               {/* CONDITIONAL INPUTS */}
-              {type === 'income' ? (
+              {/* Show Dropdown ONLY if Income AND Checkbox is TRUE */}
+              {type === 'income' && isInventorySale ? (
                 <>
                   {/* Product Dropdown */}
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Select Product</label>
+                    <label className="block text-xs font-bold text-gray-900 uppercase mb-1">Select Product</label>
                     <select 
                       className="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
                       onChange={handleProductSelect}
@@ -246,12 +271,13 @@ export default function Dashboard() {
                   </div>
                 </>
               ) : (
-                // Expense Description Input
+                // Custom Income OR Expense Description Input
                 <div>
                   <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Description</label>
                   <input 
                     type="text" 
-                    placeholder="e.g. Shop Rent, Tea"
+                    // Change placeholder based on context
+                    placeholder={type === 'income' ? "e.g. Service Charge, Repair Fee" : "e.g. Shop Rent, Tea"}
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     className="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"

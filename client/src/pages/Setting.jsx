@@ -10,7 +10,7 @@ export default function Settings() {
 
   // Get current user email from local storage
   const user = JSON.parse(localStorage.getItem('user'));
-  const API_URL = 'http://localhost:3000';
+  const API_URL = 'https://budgex-r4do.onrender.com';
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
